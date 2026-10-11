@@ -31,12 +31,12 @@ enabled = true
 state = "running"
 
 [tasks.setup]
-description = "Install Zot configuration and register the login service"
+description = "Deploy the configured Zot upstream caches and register the login service"
 depends = ["zot:configure"]
 run = "mise run zot:restart"
 
 [tasks."zot:configure"]
-description = "Validate and copy the registry configuration into ~/.zot"
+description = "Validate and deploy the upstream cache configuration into ~/.zot"
 run = '''
 set -eu
 "$ZOT_BIN" verify "$ZOT_CONFIG_SOURCE"
@@ -103,11 +103,11 @@ esac
 '''
 
 [tasks."docker:plan"]
-description = "Preview the Docker Desktop mirror setting"
+description = "Preview the Docker Desktop local cache settings"
 run = 'mise -E docker dot diff "$HOME/.docker/daemon.json"'
 
 [tasks."docker:configure"]
-description = "Back up and merge the Docker Desktop mirror setting on macOS"
+description = "Back up and deploy Docker Desktop local cache settings on macOS"
 run = '''
 set -eu
 if [ "$(uname -s)" != Darwin ]; then
@@ -117,7 +117,7 @@ fi
 target="$HOME/.docker/daemon.json"
 mise -E docker dot diff "$target"
 if mise -E docker dot status --missing "$target" >/dev/null; then
-  echo 'Docker mirror configuration is already applied.'
+  echo 'Docker cache configuration is already applied.'
   exit 0
 fi
 if [ -f "$target" ]; then

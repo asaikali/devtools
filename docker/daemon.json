@@ -1,3 +1,4 @@
 {
-  "registry-mirrors": ["http://host.docker.internal:5051"]
+  "registry-mirrors": ["http://host.docker.internal:5051"],
+  "insecure-registries": ["host.docker.internal:5051"]
 }

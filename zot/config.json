@@ -23,6 +23,83 @@
       "enable": true,
       "registries": [
         {
+          "urls": ["https://ghcr.io"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/ghcr.io" }
+          ]
+        },
+        {
+          "urls": ["https://quay.io"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/quay.io" }
+          ]
+        },
+        {
+          "urls": ["https://registry.k8s.io"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/registry.k8s.io" }
+          ]
+        },
+        {
+          "urls": ["https://public.ecr.aws"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/public.ecr.aws" }
+          ]
+        },
+        {
+          "urls": ["https://mcr.microsoft.com"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/mcr.microsoft.com" }
+          ]
+        },
+        {
+          "urls": ["https://gcr.io"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/gcr.io" }
+          ]
+        },
+        {
+          "urls": ["https://registry.gitlab.com"],
+          "onDemand": true,
+          "tlsVerify": true,
+          "manifestCheckInterval": "5m",
+          "maxRetries": 3,
+          "retryDelay": "5s",
+          "content": [
+            { "prefix": "**", "destination": "/registry.gitlab.com" }
+          ]
+        },
+        {
           "urls": ["https://registry-1.docker.io"],
           "onDemand": true,
           "tlsVerify": true,
