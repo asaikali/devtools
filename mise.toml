@@ -1,0 +1,103 @@
+min_version = "2026.10.8"
+
+[tool_alias]
+zot = "github:project-zot/zot"
+
+[tools.zot]
+version = "2.1.22"
+
+[tools.zot.platforms]
+macos-arm64 = { asset_pattern = "zot-darwin-arm64", bin = "zot" }
+macos-x64 = { asset_pattern = "zot-darwin-amd64", bin = "zot" }
+linux-arm64 = { asset_pattern = "zot-linux-arm64", bin = "zot" }
+linux-x64 = { asset_pattern = "zot-linux-amd64", bin = "zot" }
+
+[env]
+ZOT_HOME = "{{ env.HOME }}/.zot"
+ZOT_BIN = "{{ env.HOME }}/.local/share/mise/installs/zot/latest/zot"
+ZOT_CONFIG_SOURCE = "{{ config_root }}/zot/config.json"
+ZOT_URL = "http://127.0.0.1:5000"
+
+# Mise expands the leading ~/ in the executable and working directory at setup.
+# The installed service launches Zot directly, with no reference to this checkout.
+[bootstrap.services.zot]
+scope = "user"
+description = "Local Zot container image cache"
+command = "~/.local/share/mise/installs/zot/latest/zot serve config.json"
+working_directory = "~/.zot"
+requires_tools = true
+restart = "on-failure"
+enabled = true
+state = "running"
+
+[tasks.setup]
+description = "Install Zot configuration and register the login service"
+depends = ["zot:configure"]
+run = "mise run zot:restart"
+
+[tasks."zot:configure"]
+description = "Validate and copy the registry configuration into ~/.zot"
+run = '''
+set -eu
+"$ZOT_BIN" verify "$ZOT_CONFIG_SOURCE"
+mkdir -p "$ZOT_HOME/data"
+install -m 600 "$ZOT_CONFIG_SOURCE" "$ZOT_HOME/config.json"
+'''
+
+[tasks."zot:validate"]
+description = "Validate the source configuration using the latest installed Zot"
+run = '"$ZOT_BIN" verify "$ZOT_CONFIG_SOURCE"'
+
+[tasks."zot:start"]
+description = "Register and start the installed Zot service"
+run = ["mise bootstrap services apply --yes", "mise run zot:ping"]
+
+[tasks."zot:stop"]
+description = "Stop Zot for this session; login startup remains enabled"
+run = '''
+set -eu
+case "$(uname -s)" in
+  Darwin)
+    service="gui/$(id -u)/dev.mise.zot"
+    if launchctl print "$service" >/dev/null 2>&1; then launchctl bootout "$service"; fi
+    ;;
+  Linux) systemctl --user stop dev.mise.zot.service ;;
+  *) echo 'Supported platforms: macOS and Linux' >&2; exit 1 ;;
+esac
+'''
+
+[tasks."zot:restart"]
+description = "Restart the service using the latest installed Zot and installed config"
+run = ["mise bootstrap services apply --yes", '''
+set -eu
+case "$(uname -s)" in
+  Darwin) launchctl kickstart -k "gui/$(id -u)/dev.mise.zot" ;;
+  Linux) systemctl --user restart dev.mise.zot.service ;;
+  *) echo 'Supported platforms: macOS and Linux' >&2; exit 1 ;;
+esac
+''', "mise run zot:ping"]
+
+[tasks."zot:status"]
+description = "Check whether the installed Zot service is running"
+run = "mise bootstrap services status"
+
+[tasks."zot:plan"]
+description = "Preview native service registration"
+run = "mise bootstrap services apply --dry-run"
+
+[tasks."zot:ping"]
+description = "Wait briefly for the local registry's OCI endpoint"
+run = '''
+curl --fail --silent --show-error --retry 20 --retry-connrefused \
+  --retry-delay 1 --retry-max-time 20 --max-time 2 "$ZOT_URL/v2/" && echo OK
+'''
+
+[tasks."zot:ui"]
+description = "Open the Zot web interface"
+run = '''
+case "$(uname -s)" in
+  Darwin) open "$ZOT_URL/" ;;
+  Linux) xdg-open "$ZOT_URL/" ;;
+  *) echo "Open $ZOT_URL/ in your browser" ;;
+esac
+'''
