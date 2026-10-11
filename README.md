@@ -30,7 +30,7 @@ Linux systemd user session, and curl. The setup uses mise's standard user tool
 directory. Zot needs no root privileges or Homebrew.
 
 ```sh
-mise trust
+mise trust --all
 mise install
 mise run setup
 ```
@@ -95,19 +95,32 @@ docker pull 127.0.0.1:5051/library/busybox:1.37.0
 
 Docker Desktop runs its daemon inside a VM. On this Mac, container access to Zot
 through `host.docker.internal:5051` was verified; daemon pulls through localhost
-failed. To route ordinary Docker Hub pulls through Zot, merge this setting into
-Docker Desktop's **Settings → Docker Engine**, then restart Docker:
+failed. With Docker Desktop installed, configure ordinary Docker Hub pulls from
+a fresh checkout:
 
-```json
-{
-  "registry-mirrors": ["http://host.docker.internal:5051"]
-}
+```sh
+mise run docker:plan
+mise run docker:configure
+docker desktop restart
+docker pull busybox:1.37.0
 ```
 
-For native Linux, use `http://127.0.0.1:5051` as the mirror address. Preserve other
-engine settings. Docker restart can interrupt running containers; setup does not
-change or restart Docker. Docker's mirror setting covers Docker Hub. Other upstream
-registries need explicit Zot routing and corresponding client configuration.
+`docker/daemon.json` declares the mirror setting. The task uses mise's
+[native JSON merge](https://mise.jdx.dev/dotfiles/edits.html#set-keys-in-a-config-file)
+to update `~/.docker/daemon.json`, preserving other engine settings. Before a
+change, an existing file is backed up beside it as `daemon.json.before-zot.*`.
+Repeated application leaves a matching file unchanged. Invalid JSON is refused.
+The repository owns the entire `registry-mirrors` array; add any other desired
+mirrors to the source file. The installed config is a regular file and does not
+depend on this checkout.
+
+`mise.docker.toml` keeps Docker configuration opt-in, separate from Zot setup.
+The configure task targets macOS Docker Desktop and never restarts it; the
+restart command can interrupt running containers. For native Linux, merge
+`"registry-mirrors": ["http://127.0.0.1:5051"]` into Docker's daemon configuration
+(normally `/etc/docker/daemon.json`) and restart Docker separately. Docker's
+mirror setting covers Docker Hub. Other upstream registries need explicit Zot
+routing and corresponding client configuration.
 
 Cached tags are checked upstream at most once every five minutes. Docker media
 types retain their digests through `http.compat = ["docker2s2"]`; Zot 2.1.22 ignores
@@ -123,5 +136,13 @@ cached image remained accessible and unchanged.
 
 The Linux unit was rendered in an isolated Linux container. Actual Linux execution
 and login startup need testing on a systemd host. Reboot/login behavior on this Mac
-has not been exercised. Automatic Docker Desktop mirror routing is still pending
-its engine setting and restart.
+has not been exercised. Docker Desktop mirror routing was configured on this Mac
+and verified with `docker pull busybox:1.37.0`: Zot logged successful manifest and
+blob requests from the Docker daemon. Existing running containers resumed after
+Docker Desktop restarted.
+
+Docker configuration tasks were tested against temporary files: preview without
+writes, preservation of unrelated settings, backup before changes, repeated
+application without rewrites, creation of missing config, and refusal of malformed
+JSON or unrelated symlinks. Applying the task on this Mac confirmed that the
+existing mirror configuration already matches; Docker was not restarted again.

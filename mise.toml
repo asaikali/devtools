@@ -101,3 +101,30 @@ case "$(uname -s)" in
   *) echo "Open $ZOT_URL/ in your browser" ;;
 esac
 '''
+
+[tasks."docker:plan"]
+description = "Preview the Docker Desktop mirror setting"
+run = 'mise -E docker dot diff "$HOME/.docker/daemon.json"'
+
+[tasks."docker:configure"]
+description = "Back up and merge the Docker Desktop mirror setting on macOS"
+run = '''
+set -eu
+if [ "$(uname -s)" != Darwin ]; then
+  echo 'This task targets Docker Desktop on macOS; see README for native Linux.' >&2
+  exit 1
+fi
+target="$HOME/.docker/daemon.json"
+mise -E docker dot diff "$target"
+if mise -E docker dot status --missing "$target" >/dev/null; then
+  echo 'Docker mirror configuration is already applied.'
+  exit 0
+fi
+if [ -f "$target" ]; then
+  backup=$(mktemp "$target.before-zot.XXXXXX")
+  cp -p "$target" "$backup"
+  echo "Backup: $backup"
+fi
+mise -E docker dot apply --yes "$target"
+echo 'Restart Docker Desktop to activate changes: docker desktop restart'
+'''

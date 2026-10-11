@@ -1,0 +1,3 @@
+# Opt-in Docker Desktop configuration; ordinary Zot setup does not apply this.
+[dotfiles]
+"~/.docker/daemon.json/zot" = { source = "docker/daemon.json", merge = true }
