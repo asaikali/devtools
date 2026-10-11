@@ -1,0 +1,354 @@
+# .gitignore Quick Reference
+#
+# Syntax rules:
+#   • Lines starting with '#' are comments; blank lines are ignored.
+#   • Patterns are evaluated top-to-bottom; the last matching rule wins.
+#
+# Where a pattern matches — the slash rule:
+#   • No '/' at all, or only a trailing '/'  = match at any depth.
+#   • A '/' at the start OR in the middle    = anchored to the directory
+#     containing this .gitignore file. So 'temp/' matches a temp directory
+#     at any depth, but 'src/temp/' matches only src/temp/ at this level.
+#
+# Wildcards:
+#   • '*'  = zero or more characters within one path segment.
+#   • '?'  = exactly one character within one path segment.
+#   • '**' = any number of directories ('a/**/b' also matches 'a/b').
+#   • '!'  = negate (un-ignore) a match from an earlier rule.
+#
+# Common pattern meanings:
+#   Pattern       Matches
+#   -------       ----------------------------------------------------------
+#   build         Any file OR directory named "build" at any depth.
+#   build/        Any directory named "build" at any depth. Files named
+#                 "build" are never matched by a trailing-slash pattern.
+#   /build/       Directory named "build" at this level only.
+#   *.log         Any file ending in .log at any depth.
+#   src/**/temp/  "temp" directories under THIS level's src/ only — the
+#                 middle slash anchors the pattern.
+#
+# The classic gotcha — you cannot rescue files inside an ignored directory:
+#       logs/
+#       !logs/important.log    # does NOT work; git never descends into an
+#                              # excluded directory
+#   Instead ignore the directory's contents and negate what you keep:
+#       logs/**
+#       !logs/important.log
+#
+# Debugging:
+#   • `git check-ignore -v <path>` prints the exact rule (file and line)
+#     that ignores a path, or prints nothing if the path is not ignored.
+#   • check-ignore only sees active rules — if an expected pattern seems
+#     missing, check whether its section below is still commented out.
+#
+# File organization:
+#   • The active rules at the top are starter defaults for common OS and
+#     editor noise, IDE state, and developer-tooling local state. Review them
+#     during customization and remove or revise rules that do not fit.
+#   • The Java/Gradle and JavaScript/TypeScript sections below are ACTIVE —
+#     they are Sales Agent's current stack. Python, Go, and Rust remain
+#     OPTIONAL sections whose lines are commented out and inert until
+#     activated. To activate a section, remove the leading '# ' from every
+#     line below its banner — "uncomment the Python section" is enough for
+#     a coding agent. Delete sections the project will never use.
+#   • Activate and delete optional sections only as whole sections. Each
+#     is self-contained, so a '!' rescue rule is never separated from the
+#     rule it rescues.
+#   • In a repository with several languages, a section can instead be
+#     extracted (uncommented) into the language directory's own .gitignore.
+#     Git scopes per-directory files to their subtree, so one language's
+#     rules cannot affect another's files.
+#   • For a language without a section here, start from the matching
+#     template at https://github.com/github/gitignore, drop patterns the
+#     active rules already cover, and prefer anchored or distinctively
+#     named patterns over broad common-word directory names such as bin/
+#     or build/.
+
+# ═════════════════════════════════════════════════════════════════════
+#  Operating system noise
+# ═════════════════════════════════════════════════════════════════════
+
+### macOS ###
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+# 'Icon?' stands in for the untypeable 'Icon' + two CR characters; it
+# also matches five-letter names starting with "Icon", such as "Icons".
+Icon?
+.DocumentRevisions-V100
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+### Windows ###
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+### Linux ###
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ═════════════════════════════════════════════════════════════════════
+#  Editor temps, logs, archives, secrets, and local scratch
+# ═════════════════════════════════════════════════════════════════════
+
+### Editor temps ###
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+
+### Logs and diagnostics ###
+*.log
+logs/
+nohup.out
+
+### Archives — committing one is usually a mistake; negate a specific
+### file (for example !fixtures/sample.zip) when it is deliberate ###
+*.zip
+*.gz
+*.tgz
+
+### Secrets and local config ###
+.env
+.env.local
+.env.*.local
+
+### Local scratch ###
+/tmp/
+
+# ═════════════════════════════════════════════════════════════════════
+#  IDEs — keep only the editors your team uses
+# ═════════════════════════════════════════════════════════════════════
+
+### JetBrains (IntelliJ IDEA, GoLand, WebStorm, ...) ###
+# JetBrains recommends committing .idea selectively; this project ignores
+# it wholesale to avoid per-user churn and leaked data-source credentials.
+# Share run configurations through the committed .run/ directory instead.
+.idea/
+*.iws
+*.iml
+*.ipr
+# IntelliJ writes build output to out/ when Gradle build delegation is off.
+out/
+!**/src/**/out/
+
+### Eclipse and Spring Tool Suite ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/**/bin/
+
+### VS Code ###
+# Must be **/.vscode/* (not .vscode/) — git cannot re-include files inside
+# an excluded directory, and the ** form applies the same policy to every
+# application's .vscode directory, not just the repo root's.
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+!**/.vscode/mcp.json
+!**/.vscode/*.code-snippets
+# Local History extension noise
+**/.history/
+*.vsix
+
+# ═════════════════════════════════════════════════════════════════════
+#  Developer tooling — local-only state. The companion config files
+#  (mise.toml, compose.yaml, AGENTS.md, ...) are meant to be
+#  committed; only per-machine state is ignored here.
+# ═════════════════════════════════════════════════════════════════════
+
+### mise local overrides (mise.toml and .tool-versions are committed) ###
+mise.local.toml
+.mise.local.toml
+mise.*.local.toml
+.mise.*.local.toml
+
+### Cloud Foundry CLI authentication and target state for this checkout ###
+/.cf/
+
+### AI coding agents — session/local state; shared instruction files
+### (AGENTS.md, CLAUDE.md, .cursor/rules, ...) are committed ###
+**/.claude/*.local.json
+CLAUDE.local.md
+.aider*
+
+### Docker Compose local overrides — auto-loaded by `docker compose up`;
+### delete these lines if the team commits a shared override instead ###
+compose.override.yaml
+compose.override.yml
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# ═════════════════════════════════════════════════════════════════════
+#  Java / JVM (Gradle, Kotlin, packaging, crash dumps)
+# ═════════════════════════════════════════════════════════════════════
+
+### Compiled output ###
+*.class
+
+### Package archives ###
+*.jar
+*.war
+*.ear
+*.nar
+*.car
+*.sar
+*.mar
+
+### JVM crash/heap dumps ###
+hs_err_pid*
+replay_pid*
+*.hprof
+
+### Gradle ###
+.gradle
+.gradletasknamecache
+build/
+# Gradle expects the wrapper jar in version control.
+!gradle-wrapper.jar
+# Rescue real source dirs named "build" anywhere under a src/ tree; build
+# tools never write output inside src/, so this cannot leak build output.
+!**/src/**/build/
+
+### Kotlin 2.0+ Gradle plugin project data (kotlinlang.org: do not commit) ###
+.kotlin/
+
+# ═════════════════════════════════════════════════════════════════════
+#  JavaScript / TypeScript (npm, Vue, Vite, Playwright)
+#  Commit package-lock.json.
+# ═════════════════════════════════════════════════════════════════════
+
+### Dependencies and npm ###
+node_modules/
+npm-debug.log*
+
+### Vite / Vue build output ###
+dist/
+/applications/ask-tanzu-ui/cf/public/
+dist-ssr/
+.vite/
+!**/src/**/dist/
+!**/src/**/dist-ssr/
+# auto-imports.d.ts and components.d.ts (unplugin-generated) are deliberately
+# not ignored — commit them so CI type-checking sees the same declarations.
+
+### Testing and coverage ###
+coverage/
+test-results/
+playwright-report/
+blob-report/
+**/playwright/.cache/
+
+### TypeScript and lint caches ###
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# ═════════════════════════════════════════════════════════════════════
+#  OPTIONAL: Python (uv, poetry, pdm, pytest, mypy, ruff, Jupyter)
+#  Activate: remove the leading '# ' from every line below this banner.
+# ═════════════════════════════════════════════════════════════════════
+
+# ### Bytecode and C extensions ###
+# __pycache__/
+# *.py[codz]
+# *.so
+
+# ### Packaging (anchored — each Python package in a monorepo gets its own) ###
+# /dist/
+# /build/
+# *.egg-info/
+
+# ### Virtual environments (uv, poetry, and pipenv default to .venv) ###
+# .venv/
+# venv/
+
+# ### Test, coverage, type-check, and lint caches ###
+# .pytest_cache/
+# .tox/
+# .nox/
+# .hypothesis/
+# .coverage
+# .coverage.*
+# htmlcov/
+# coverage.xml
+# *.lcov
+# .mypy_cache/
+# .dmypy.json
+# dmypy.json
+# .ruff_cache/
+
+# ### Tool state ###
+# .pdm-python
+# .pdm-build/
+# .pypirc
+
+# ### Notebooks and docs ###
+# .ipynb_checkpoints/
+# docs/_build/
+
+# # Lockfiles (uv.lock, poetry.lock, pdm.lock, Pipfile.lock) and
+# # .python-version should be COMMITTED.
+
+# ═════════════════════════════════════════════════════════════════════
+#  OPTIONAL: Go (compiled binaries, test artifacts, workspace files)
+#  Activate: remove the leading '# ' from every line below this banner.
+# ═════════════════════════════════════════════════════════════════════
+
+# ### Compiled binaries ###
+# *.exe
+# *.exe~
+# *.dll
+# *.so
+# *.dylib
+
+# ### Test artifacts ###
+# *.test
+# # Coverage output — narrowed from the canonical *.out, which also eats
+# # expected-output test fixtures.
+# coverage.out
+# *.coverprofile
+# profile.cov
+# # Delve debug binaries dropped by GoLand and VS Code.
+# __debug_bin*
+
+# ### Workspace files (local development config; CI builds from go.mod) ###
+# go.work
+# go.work.sum
+
+# # vendor/   # uncomment if vendored dependencies should not be tracked
+
+# ═════════════════════════════════════════════════════════════════════
+#  OPTIONAL: Rust (Cargo build output, rustfmt backups, compiler dumps)
+#  Activate: remove the leading '# ' from every line below this banner.
+# ═════════════════════════════════════════════════════════════════════
+
+# # Cargo builds into target/ at the workspace root. Anchored so it cannot
+# # interfere with other languages' rules.
+# /target/
+# **/*.rs.bk
+# *.pdb
+# # rustc internal-compiler-error dumps, written to the working directory.
+# rustc-ice-*.txt
+
+# # Cargo.lock should be COMMITTED — even for libraries (Cargo team
+# # guidance since 2023).
