@@ -16,7 +16,7 @@ linux-x64 = { asset_pattern = "zot-linux-amd64", bin = "zot" }
 ZOT_HOME = "{{ env.HOME }}/.zot"
 ZOT_BIN = "{{ env.HOME }}/.local/share/mise/installs/zot/latest/zot"
 ZOT_CONFIG_SOURCE = "{{ config_root }}/zot/config.json"
-ZOT_URL = "http://127.0.0.1:5000"
+ZOT_URL = "http://127.0.0.1:5051"
 
 # Mise expands the leading ~/ in the executable and working directory at setup.
 # The installed service launches Zot directly, with no reference to this checkout.

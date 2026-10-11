@@ -5,9 +5,12 @@ tools and background services run independently of this repository.
 
 ## Zot container image cache
 
-Zot runs as your user at **http://127.0.0.1:5000**, starts at login, and restarts
+Zot runs as your user at **http://127.0.0.1:5051**, starts at login, and restarts
 after unexpected failure. Docker Hub images are cached on demand. Search and the
 web interface are enabled.
+
+Port 5051 avoids macOS AirPlay's use of port 5000 and keeps this service separate
+from the OCI playground on port 5050. See [Apple's port reference](https://support.apple.com/en-us/103229).
 
 ```text
 ~/.zot/
@@ -87,21 +90,21 @@ login is outside the initial scope.
 On native Linux, with Docker on the same host:
 
 ```sh
-docker pull 127.0.0.1:5000/library/busybox:1.37.0
+docker pull 127.0.0.1:5051/library/busybox:1.37.0
 ```
 
 Docker Desktop runs its daemon inside a VM. On this Mac, container access to Zot
-through `host.docker.internal:5000` was verified; daemon pulls through localhost
+through `host.docker.internal:5051` was verified; daemon pulls through localhost
 failed. To route ordinary Docker Hub pulls through Zot, merge this setting into
 Docker Desktop's **Settings → Docker Engine**, then restart Docker:
 
 ```json
 {
-  "registry-mirrors": ["http://host.docker.internal:5000"]
+  "registry-mirrors": ["http://host.docker.internal:5051"]
 }
 ```
 
-For native Linux, use `http://127.0.0.1:5000` as the mirror address. Preserve other
+For native Linux, use `http://127.0.0.1:5051` as the mirror address. Preserve other
 engine settings. Docker restart can interrupt running containers; setup does not
 change or restart Docker. Docker's mirror setting covers Docker Hub. Other upstream
 registries need explicit Zot routing and corresponding client configuration.
