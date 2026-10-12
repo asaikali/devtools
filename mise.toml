@@ -30,6 +30,10 @@ restart = "on-failure"
 enabled = true
 state = "running"
 
+# Docker Desktop installs its credential helper in /usr/local/bin.
+[bootstrap.services.zot.environment]
+PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 [tasks.setup]
 description = "Deploy the configured Zot upstream caches and register the login service"
 depends = ["zot:configure"]

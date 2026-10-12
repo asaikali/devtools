@@ -153,8 +153,22 @@ repository path and tag (or digest) after its registry prefix. Docker Hub offici
 images need the `library/` prefix when pulled explicitly from Zot.
 
 All upstreams use TLS verification and on-demand fetching, with no periodic
-full-registry sync. No upstream credentials are configured; private images need
-additional authentication. Google's entry covers `gcr.io` URLs backed by Artifact
+full-registry sync. Zot 2.1.22 also reads your saved Docker registry credentials.
+On macOS, the service PATH includes `/usr/local/bin` so it can access Docker
+Desktop's credential helper. Your Docker Hub login can therefore be used for
+authenticated upstream pulls without copying credentials into this repository.
+See [Zot's Docker credential integration](https://github.com/project-zot/zot/blob/v2.1.22/pkg/extensions/sync/service.go#L1471).
+
+After signing back into Docker Desktop or switching accounts, restart Zot to
+reload credentials immediately:
+
+```sh
+mise run zot:restart
+# Or, without this checkout:
+launchctl kickstart -k "gui/$(id -u)/dev.mise.zot"
+```
+
+Google's entry covers `gcr.io` URLs backed by Artifact
 Registry, not every regional `*-docker.pkg.dev` host. See
 [Google's gcr.io repositories](https://docs.cloud.google.com/artifact-registry/docs/transition/gcr-repositories).
 
@@ -178,6 +192,10 @@ Docker pulls succeeded for GHCR Podinfo and Kubernetes Pause; automatic Docker
 Hub routing still worked for BusyBox. All six existing containers resumed after
 Docker Desktop restarted.
 
+The installed LaunchAgent PATH was verified to find Docker Desktop's credential
+helper. The helper returned the saved Docker Hub login without displaying or
+saving it, and a Docker Hub pull succeeded after the mise-managed Zot restart.
+
 Docker configuration tasks were tested with temporary files for preview without
 writes, preservation of unrelated settings, backups, repeated application without
 rewrites, missing config creation, and refusal of malformed JSON or unrelated
@@ -186,5 +204,5 @@ repository config files were unavailable; a cached image remained unchanged.
 
 The Linux unit was rendered in an isolated container. Actual Linux execution and
 login startup need testing on a systemd host. Reboot/login behavior on this Mac
-has not been exercised. Private upstream authentication has not been configured
-or tested.
+has not been exercised. Pulls from private upstream repositories have not been
+tested.
